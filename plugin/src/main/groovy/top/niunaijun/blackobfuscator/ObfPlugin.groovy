@@ -53,7 +53,7 @@ public class ObfPlugin implements Plugin<Project> {
                     void execute(ApplicationVariant applicationVariant) {
                         File mappingFile = null
                         if (applicationVariant.buildType.minifyEnabled) {
-                            mappingFile = applicationVariant.mappingFile
+                            mappingFile = getMappingFile(applicationVariant)
                         }
                         def buildType = upperCaseFirst(applicationVariant.buildType.name)
                         boolean empty = true
@@ -93,6 +93,17 @@ public class ObfPlugin implements Plugin<Project> {
         char[] arr = val.toCharArray()
         arr[0] = Character.toUpperCase(arr[0])
         return new String(arr)
+    }
+
+    private static File getMappingFile(ApplicationVariant variant) {
+        try {
+            if (variant.getMappingFileProvider() != null && !variant.getMappingFileProvider().get().isEmpty()) {
+                return variant.getMappingFileProvider().get().singleFile
+            }
+        } catch (Exception ignored) {
+            return variant.mappingFile
+        }
+        return null
     }
 
     private void addTask(String name, List<Task> tasks, File mappingFile) {
